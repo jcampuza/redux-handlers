@@ -1,0 +1,9 @@
+node_modules
+
+.vscode
+.idea
+.cache
+/lib
+/.rts2*
+
+yarn-*.log
