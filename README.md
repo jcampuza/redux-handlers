@@ -10,7 +10,7 @@ import { createStore, applyMiddleware } from 'redux';
 
 const middleware = createHandlerMiddleware();
 
-const store = createStore(() => ({}), applyMiddleware(middleware.middlware));
+const store = createStore(() => ({}), applyMiddleware(middleware.middleware));
 
 /**
  *  register actions to handle
