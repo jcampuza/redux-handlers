@@ -13,6 +13,7 @@
   "scripts": {
     "build": "microbundle",
     "test": "jest",
+    "coverage": "jest --coverage",
     "lint": "eslint src --ext .ts,.tsx,.js,.jsx"
   },
   "keywords": [

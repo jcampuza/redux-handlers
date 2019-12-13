@@ -4,46 +4,45 @@ export interface ActionHandler<A extends Action = AnyAction> {
   (action: A, store: MiddlewareAPI): void;
 }
 
-export type ActionHandlerMap = Record<string, ActionHandler>;
-
-export type CombinedActionHandlerMap = Record<string, ActionHandler[]>;
+type CombinedActionHandlerMap = Record<string, ActionHandler[]>;
 
 /**
  * Middleware for listening to dispatched actions and "Handling" them with side effects
  * Essentially a simpler version of effects/sagas (i.e. redux-observable/Saga)
  */
-export const createHandlerMiddleware = (...actionHandlerMaps: Array<ActionHandlerMap>) => {
+export const createHandlerMiddleware = () => {
   const combinedHandlers: CombinedActionHandlerMap = {};
-  const registerHandlerMap = (handlerMap: ActionHandlerMap) => {
-    for (const [actionType, actionHandler] of Object.entries(handlerMap)) {
-      if (combinedHandlers[actionType]) {
-        combinedHandlers[actionType].push(actionHandler);
-      } else {
-        combinedHandlers[actionType] = [actionHandler];
-      }
-    }
-  };
 
-  for (const actionHandlerMap of actionHandlerMaps) {
-    registerHandlerMap(actionHandlerMap);
-  }
+  // Individually registered handlers can be disposed/unsubscribed
+  const registerHandler = (actionType: string, actionHandler: ActionHandler) => {
+    if (combinedHandlers[actionType]) {
+      combinedHandlers[actionType].push(actionHandler);
+    } else {
+      combinedHandlers[actionType] = [actionHandler];
+    }
+
+    return { registerHandler };
+  };
 
   const middleware: Middleware = store => next => action => {
-    const processedAction = next(action);
+    const dispatchedAction = next(action);
 
-    if (!processedAction) {
-      return processedAction;
+    if (!dispatchedAction || !dispatchedAction.type) {
+      return dispatchedAction;
     }
 
-    const handlersForAction = combinedHandlers[processedAction.type];
+    const handlersForAction = combinedHandlers[dispatchedAction.type];
 
     if (!handlersForAction) {
-      return processedAction;
+      return dispatchedAction;
     }
 
-    handlersForAction.forEach(handler => handler(processedAction, store));
-    return processedAction;
+    for (const handler of handlersForAction) {
+      handler(dispatchedAction, store);
+    }
+
+    return dispatchedAction;
   };
 
-  return { middleware, registerHandlerMap };
+  return { middleware, registerHandler };
 };
