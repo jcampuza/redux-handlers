@@ -8,9 +8,9 @@ A simple middleware that fills the gap between be as powerful as Sagas or Observ
 import * as actions from './actions';
 import { createStore, applyMiddleware } from 'redux';
 
-const { middleware, registerHandler } = createHandlerMiddleware();
+const middleware = createHandlerMiddleware();
 
-const store = createStore(() => ({}), applyMiddleware(middleware));
+const store = createStore(() => ({}), applyMiddleware(middleware.middlware));
 
 /**
  *  register actions to handle
